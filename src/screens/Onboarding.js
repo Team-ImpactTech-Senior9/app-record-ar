@@ -1,4 +1,3 @@
-// src/screens/Onboarding.js
 import React, { useState, useRef } from 'react';
 import {
   View,
@@ -9,61 +8,71 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
-import BotonGrande from '../components/BotonGrande';
-import { onboardingData } from '../constants/onboardingData';
+import { COLORS, TYPOGRAPHY, TOUCH, BORDERS } from '../styles/colors';
 
 const { width, height } = Dimensions.get('window');
+
+const onboardingData = [
+  {
+    id: '1',
+    badge: 'TODO EN UN LUGAR',
+    titulo: 'Bienvenido/a a\nImpactTech',
+    descripcion: 'Tu salud, tu agenda y tu entretenimiento, más fácil y claro que nunca.',
+    emoji: '👥',
+    color: COLORS.primary,
+    fondo: COLORS.surface,
+  },
+  {
+    id: '2',
+    badge: 'APRENDE FÁCIL',
+    titulo: 'Paso a paso,\na tu ritmo',
+    descripcion: 'Guías simples y tutoriales cortos para aprender a usar tu celular sin miedo.',
+    emoji: '📱',
+    color: COLORS.secondary,
+    fondo: COLORS.surface,
+  },
+  {
+    id: '3',
+    badge: 'SIEMPRE SEGURO/A',
+    titulo: 'Herramientas\npara cuidarte',
+    descripcion: 'Recordatorios de medicación, notas y un botón SOS siempre a mano.',
+    emoji: '✅',
+    color: COLORS.primary,
+    fondo: COLORS.surface,
+  },
+];
 
 export default function Onboarding({ navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
 
-  const renderItem = ({ item }) => {
-    return (
-      <View style={[styles.slide, { backgroundColor: item.fondo }]}>
-        <StatusBar barStyle="dark-content" backgroundColor={item.fondo} />
-        
-        {/* Emoji grande */}
-        <View style={styles.emojiContainer}>
-          <Text style={styles.emoji}>{item.emoji}</Text>
-        </View>
-
-        {/* Título */}
-        <Text style={[styles.titulo, { color: item.color }]}>
-          {item.titulo}
-        </Text>
-
-        {/* Descripción */}
-        <Text style={styles.descripcion}>
-          {item.descripcion}
-        </Text>
-
-        {/* Indicadores visuales */}
-        <View style={styles.indicadoresContainer}>
-          {onboardingData.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.indicador,
-                currentIndex === index && styles.indicadorActivo,
-                { backgroundColor: currentIndex === index ? item.color : '#CCCCCC' }
-              ]}
-            />
-          ))}
-        </View>
+  const renderItem = ({ item }) => (
+    <View style={[styles.slide, { backgroundColor: item.fondo }]}>
+      <StatusBar barStyle="dark-content" backgroundColor={COLORS.surface} />
+      
+      {/* Emoji/Ícono */}
+      <View style={styles.iconoContainer}>
+        <Text style={styles.emoji}>{item.emoji}</Text>
       </View>
-    );
-  };
+      
+      {/* Badge */}
+      <View style={[styles.badge, { backgroundColor: item.color + '20' }]}>
+        <Text style={[styles.badgeTexto, { color: item.color }]}>{item.badge}</Text>
+      </View>
+      
+      {/* Título */}
+      <Text style={[styles.titulo, { color: item.color }]}>{item.titulo}</Text>
+      
+      {/* Descripción */}
+      <Text style={styles.descripcion}>{item.descripcion}</Text>
+    </View>
+  );
 
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
-      flatListRef.current.scrollToIndex({
-        index: currentIndex + 1,
-        animated: true,
-      });
+      flatListRef.current.scrollToIndex({ index: currentIndex + 1, animated: true });
       setCurrentIndex(currentIndex + 1);
     } else {
-      // Si es la última pantalla, ir al login
       navigation.replace('Login');
     }
   };
@@ -90,26 +99,27 @@ export default function Onboarding({ navigation }) {
         keyExtractor={(item) => item.id}
       />
       
-      {/* Botones */}
-      <View style={styles.botonesContainer}>
-        {currentIndex < onboardingData.length - 1 ? (
-          <>
-            <TouchableOpacity onPress={handleSkip} style={styles.botonSaltar}>
-              <Text style={styles.textoSaltar}>Saltar</Text>
-            </TouchableOpacity>
-            <BotonGrande
-              titulo="Siguiente"
-              onPress={handleNext}
-              color="#4CAF50"
+      <View style={styles.footer}>
+        <TouchableOpacity onPress={handleSkip} style={styles.botonSaltar}>
+          <Text style={styles.textoSaltar}>Saltar</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.dotsContainer}>
+          {onboardingData.map((_, index) => (
+            <View
+              key={index}
+              style={[
+                styles.dot,
+                currentIndex === index && styles.dotActivo,
+                { backgroundColor: currentIndex === index ? COLORS.primary : COLORS.outlineVariant }
+              ]}
             />
-          </>
-        ) : (
-          <BotonGrande
-            titulo="Comenzar"
-            onPress={handleNext}
-            color="#4CAF50"
-          />
-        )}
+          ))}
+        </View>
+        
+        <TouchableOpacity onPress={handleNext} style={styles.botonSiguiente}>
+          <Text style={styles.textoSiguiente}>→</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -118,63 +128,97 @@ export default function Onboarding({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surface,
   },
   slide: {
-    width: width,
-    height: height,
+    width,
+    height: height - 120,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 30,
   },
-  emojiContainer: {
-    marginBottom: 40,
+  iconoContainer: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: COLORS.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 30,
   },
   emoji: {
-    fontSize: 120,
+    fontSize: 40,
+  },
+  badge: {
+    paddingHorizontal: 16,
+    paddingVertical: 6,
+    borderRadius: BORDERS.full,
+    marginBottom: 24,
+  },
+  badgeTexto: {
+    fontSize: 14,
+    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.fontFamily,
+    letterSpacing: 1,
   },
   titulo: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 20,
+    fontSize: TYPOGRAPHY.sizes.display,
+    fontWeight: '600',
     textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: TYPOGRAPHY.fontFamily,
+    lineHeight: 42,
   },
   descripcion: {
-    fontSize: 18,
-    color: '#666666',
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.onSurface,
     textAlign: 'center',
-    lineHeight: 28,
     paddingHorizontal: 20,
-    marginBottom: 50,
+    fontFamily: TYPOGRAPHY.fontFamily,
+    lineHeight: 24,
   },
-  indicadoresContainer: {
+  footer: {
     flexDirection: 'row',
-    position: 'absolute',
-    bottom: 120,
-    alignSelf: 'center',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingBottom: 30,
+    height: 80,
   },
-  indicador: {
+  botonSaltar: {
+    minHeight: TOUCH.minHeight,
+    justifyContent: 'center',
+  },
+  textoSaltar: {
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.outlineVariant,
+    fontWeight: '500',
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  dotsContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  dot: {
     width: 8,
     height: 8,
     borderRadius: 4,
-    marginHorizontal: 5,
+    marginHorizontal: 6,
   },
-  indicadorActivo: {
-    width: 20,
+  dotActivo: {
+    width: 24,
   },
-  botonesContainer: {
-    position: 'absolute',
-    bottom: 40,
-    left: 20,
-    right: 20,
+  botonSiguiente: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.primary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  botonSaltar: {
-    alignSelf: 'flex-end',
-    marginBottom: 15,
-  },
-  textoSaltar: {
-    fontSize: 16,
-    color: '#999999',
+  textoSiguiente: {
+    fontSize: 24,
+    color: COLORS.onPrimary,
     fontWeight: '600',
   },
 });

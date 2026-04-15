@@ -2,14 +2,19 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, BORDERS, SHADOWS } from '../styles/colors';
 
-export default function TarjetaNota({ nota, onEliminar }) {
+export default function TarjetaEvento({ evento, onEliminar }) {
   return (
     <View style={styles.tarjeta}>
       <View style={styles.contenido}>
-        <Text style={styles.texto}>{nota.texto}</Text>
-        <Text style={styles.fecha}>{nota.fecha}</Text>
+        <Text style={styles.titulo}>{evento.titulo}</Text>
+        <Text style={styles.fecha}>
+          📅 {evento.fecha} - ⏰ {evento.hora}
+        </Text>
+        {evento.descripcion ? (
+          <Text style={styles.descripcion}>{evento.descripcion}</Text>
+        ) : null}
       </View>
-      <TouchableOpacity onPress={() => onEliminar(nota.id)} style={styles.botonEliminar}>
+      <TouchableOpacity onPress={() => onEliminar(evento.id)} style={styles.botonEliminar}>
         <Text style={styles.eliminar}>🗑️</Text>
       </TouchableOpacity>
     </View>
@@ -19,7 +24,7 @@ export default function TarjetaNota({ nota, onEliminar }) {
 const styles = StyleSheet.create({
   tarjeta: {
     backgroundColor: COLORS.surfaceContainerLowest,
-    borderRadius: BORDERS.xl, // Curvas dramáticas para datos estáticos
+    borderRadius: BORDERS.xl,
     padding: 16,
     marginVertical: 8,
     marginHorizontal: 16,
@@ -35,15 +40,22 @@ const styles = StyleSheet.create({
   contenido: {
     flex: 1,
   },
-  texto: {
+  titulo: {
     fontSize: 16,
-    color: COLORS.onSurface,
+    fontWeight: '600',
+    color: COLORS.primary,
     fontFamily: 'Lexend',
     marginBottom: 4,
   },
   fecha: {
-    fontSize: 12,
-    color: COLORS.outlineVariant,
+    fontSize: 14,
+    color: COLORS.secondary,
+    fontFamily: 'Lexend',
+    marginBottom: 4,
+  },
+  descripcion: {
+    fontSize: 14,
+    color: COLORS.onSurface,
     fontFamily: 'Lexend',
   },
   botonEliminar: {

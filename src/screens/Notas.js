@@ -5,7 +5,6 @@ import {
   TextInput,
   FlatList,
   StyleSheet,
-  TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
@@ -13,14 +12,12 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import TarjetaNota from '../components/TarjetaNota';
 import BotonGrande from '../components/BotonGrande';
+import { COLORS, BORDERS, TYPOGRAPHY, TOUCH } from '../styles/colors';
 
 export default function Notas() {
   const [notas, setNotas] = useState([]);
   const [textoNota, setTextoNota] = useState('');
-  const [editando, setEditando] = useState(false);
-  const [notaEditando, setNotaEditando] = useState(null);
 
-  // Cargar notas al iniciar
   useEffect(() => {
     cargarNotas();
   }, []);
@@ -89,7 +86,7 @@ export default function Notas() {
         <TextInput
           style={styles.input}
           placeholder="Escribe tu nota aquí..."
-          placeholderTextColor="#999"
+          placeholderTextColor={COLORS.outlineVariant}
           value={textoNota}
           onChangeText={setTextoNota}
           multiline
@@ -97,7 +94,7 @@ export default function Notas() {
         <BotonGrande
           titulo="Guardar Nota"
           onPress={agregarNota}
-          color="#4CAF50"
+          color={COLORS.primary}
         />
       </View>
 
@@ -122,34 +119,37 @@ export default function Notas() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: COLORS.surface,
   },
   inputContainer: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: COLORS.surfaceContainerLowest,
     padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0E0E0',
+    borderBottomWidth: 0, // No usar bordes sólidos
   },
   input: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 10,
-    padding: 15,
-    fontSize: 16,
+    backgroundColor: COLORS.surfaceContainerLow,
+    borderRadius: BORDERS.full, // Pill-shaped
+    padding: 16,
+    fontSize: TYPOGRAPHY.sizes.body,
+    fontFamily: TYPOGRAPHY.fontFamily,
     minHeight: 80,
     textAlignVertical: 'top',
-    marginBottom: 10,
+    marginBottom: 12,
+    color: COLORS.onSurface,
   },
   tituloLista: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontSize: TYPOGRAPHY.sizes.headline,
+    fontWeight: '600',
+    color: COLORS.onSurface,
+    fontFamily: TYPOGRAPHY.fontFamily,
     margin: 16,
     marginBottom: 8,
   },
   listaVacia: {
     textAlign: 'center',
-    fontSize: 16,
-    color: '#999',
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.outlineVariant,
+    fontFamily: TYPOGRAPHY.fontFamily,
     marginTop: 50,
   },
-});;
+});

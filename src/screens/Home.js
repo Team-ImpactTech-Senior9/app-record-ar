@@ -1,33 +1,38 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import BotonGrande from '../components/BotonGrande';
+import { COLORS, TYPOGRAPHY } from '../styles/colors';
 
 export default function Home({ navigation }) {
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <Text style={styles.titulo}>🏠 Inicio</Text>
-      <Text style={styles.bienvenida}>¡Bienvenido a RecordAR!</Text>
+      <Text style={styles.titulo}>🏠 Clarity Care</Text>
+      <Text style={styles.bienvenida}>¡Bienvenido a tu asistente de salud!</Text>
       
       <View style={styles.menu}>
         <BotonGrande
           titulo="📝 Notas"
           onPress={() => navigation.navigate('Notas')}
-          color="#4CAF50"
+          color={COLORS.primary}
+          variant="primary"
         />
         <BotonGrande
           titulo="📅 Eventos"
           onPress={() => navigation.navigate('Eventos')}
-          color="#2196F3"
+          color={COLORS.secondary}
+          variant="secondary"
         />
         <BotonGrande
           titulo="🎮 Tutoriales"
           onPress={() => navigation.navigate('Tutoriales')}
-          color="#FF9800"
+          color={COLORS.primaryContainer}
+          variant="primary"
         />
         <BotonGrande
           titulo="⚙️ Ayuda"
           onPress={() => navigation.navigate('Ayuda')}
-          color="#9E9E9E"
+          color={COLORS.outlineVariant}
+          variant="primary"
         />
       </View>
     </ScrollView>
@@ -38,21 +43,23 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: COLORS.surface,
   },
   titulo: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#4CAF50',
+    fontSize: TYPOGRAPHY.sizes.display,
+    fontWeight: '600',
+    color: COLORS.primary,
     textAlign: 'center',
     marginTop: 20,
     marginBottom: 10,
+    fontFamily: TYPOGRAPHY.fontFamily,
   },
   bienvenida: {
-    fontSize: 18,
-    color: '#666',
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.onSurface,
     textAlign: 'center',
     marginBottom: 30,
+    fontFamily: TYPOGRAPHY.fontFamily,
   },
   menu: {
     gap: 15,
