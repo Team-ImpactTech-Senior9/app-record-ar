@@ -8,6 +8,7 @@ import {
   Dimensions,
   StatusBar,
 } from 'react-native';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, TOUCH, BORDERS } from '../styles/colors';
 
 const { width, height } = Dimensions.get('window');
@@ -18,7 +19,8 @@ const onboardingData = [
     badge: 'TODO EN UN LUGAR',
     titulo: 'Bienvenido/a a\nImpactTech',
     descripcion: 'Tu salud, tu agenda y tu entretenimiento, más fácil y claro que nunca.',
-    emoji: '👥',
+    iconName: 'people',
+    iconLib: 'Ionicons',
     color: COLORS.primary,
     fondo: COLORS.surface,
   },
@@ -27,7 +29,8 @@ const onboardingData = [
     badge: 'APRENDE FÁCIL',
     titulo: 'Paso a paso,\na tu ritmo',
     descripcion: 'Guías simples y tutoriales cortos para aprender a usar tu celular sin miedo.',
-    emoji: '📱',
+    iconName: 'cellphone-message',
+    iconLib: 'MaterialCommunityIcons',
     color: COLORS.secondary,
     fondo: COLORS.surface,
   },
@@ -36,7 +39,8 @@ const onboardingData = [
     badge: 'SIEMPRE SEGURO/A',
     titulo: 'Herramientas\npara cuidarte',
     descripcion: 'Recordatorios de medicación, notas y un botón SOS siempre a mano.',
-    emoji: '✅',
+    iconName: 'checkmark-circle',
+    iconLib: 'Ionicons',
     color: COLORS.primary,
     fondo: COLORS.surface,
   },
@@ -46,32 +50,38 @@ export default function Onboarding({ navigation }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const flatListRef = useRef(null);
 
+  const renderIcon = (item) => {
+    if (item.iconLib === 'Ionicons') {
+      return <Ionicons name={item.iconName} size={48} color={item.color} />;
+    } else {
+      return <MaterialCommunityIcons name={item.iconName} size={48} color={item.color} />;
+    }
+  };
+
   const renderItem = ({ item }) => (
     <View style={[styles.slide, { backgroundColor: item.fondo }]}>
       <StatusBar barStyle="dark-content" backgroundColor={COLORS.surface} />
       
-      {/* Emoji/Ícono */}
-      <View style={styles.iconoContainer}>
-        <Text style={styles.emoji}>{item.emoji}</Text>
+      <View style={[styles.iconoContainer, { borderColor: item.color + '40' }]}>
+        {renderIcon(item)}
       </View>
       
-      {/* Badge */}
       <View style={[styles.badge, { backgroundColor: item.color + '20' }]}>
         <Text style={[styles.badgeTexto, { color: item.color }]}>{item.badge}</Text>
       </View>
       
-      {/* Título */}
       <Text style={[styles.titulo, { color: item.color }]}>{item.titulo}</Text>
-      
-      {/* Descripción */}
       <Text style={styles.descripcion}>{item.descripcion}</Text>
     </View>
   );
 
   const handleNext = () => {
     if (currentIndex < onboardingData.length - 1) {
-      flatListRef.current.scrollToIndex({ index: currentIndex + 1, animated: true });
-      setCurrentIndex(currentIndex + 1);
+      flatListRef.current.scrollToIndex({
+        index: currentIndex + 1,
+        animated: true,
+      });
+      // NO hacer setCurrentIndex aquí, onScrollEnd lo hará
     } else {
       navigation.replace('Login');
     }
@@ -81,7 +91,7 @@ export default function Onboarding({ navigation }) {
     navigation.replace('Login');
   };
 
-  const onScroll = (event) => {
+  const onScrollEnd = (event) => {
     const index = Math.round(event.nativeEvent.contentOffset.x / width);
     setCurrentIndex(index);
   };
@@ -95,7 +105,7 @@ export default function Onboarding({ navigation }) {
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
-        onScroll={onScroll}
+        onMomentumScrollEnd={onScrollEnd}
         keyExtractor={(item) => item.id}
       />
       
@@ -138,16 +148,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 30,
   },
   iconoContainer: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
     backgroundColor: COLORS.surfaceContainerLow,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 30,
-  },
-  emoji: {
-    fontSize: 40,
+    borderWidth: 1,
   },
   badge: {
     paddingHorizontal: 16,
