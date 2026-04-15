@@ -16,19 +16,18 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       <Stack.Navigator
+        initialRouteName="Onboarding"
         screenOptions={{
-          headerStyle: { backgroundColor: '#4CAF50' },
-          headerTintColor: '#FFFFFF',
-          headerTitleStyle: { fontSize: 22, fontWeight: 'bold' },
+          headerShown: false,  // Esto oculta el header en TODAS las pantallas
         }}
       >
-        <Stack.Screen name="Onboarding" component={Onboarding} options={{ headerShown: false }} />
-        <Stack.Screen name="Login" component={Login} options={{ headerShown: false }} />
-        <Stack.Screen name="Home" component={Home} options={{ title: 'Inicio' }} />
-        <Stack.Screen name="Notas" component={Notas} options={{ title: '📝 Notas' }} />
-        <Stack.Screen name="Eventos" component={Eventos} options={{ title: '📅 Eventos' }} />
-        <Stack.Screen name="Tutoriales" component={Tutoriales} options={{ title: '🎮 Tutoriales' }} />
-        <Stack.Screen name="Ayuda" component={Ayuda} options={{ title: '⚙️ Ayuda' }} />
+        <Stack.Screen name="Onboarding" component={Onboarding} />
+        <Stack.Screen name="Login" component={Login} />
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Notas" component={Notas} />
+        <Stack.Screen name="Eventos" component={Eventos} />
+        <Stack.Screen name="Tutoriales" component={Tutoriales} />
+        <Stack.Screen name="Ayuda" component={Ayuda} />
       </Stack.Navigator>
     </NavigationContainer>
   );
