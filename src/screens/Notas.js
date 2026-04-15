@@ -5,14 +5,16 @@ import {
   TextInput,
   FlatList,
   StyleSheet,
+  TouchableOpacity,
   Alert,
   KeyboardAvoidingView,
   Platform,
+  Linking,
+  ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import TarjetaNota from '../components/TarjetaNota';
-import BotonGrande from '../components/BotonGrande';
-import { COLORS, BORDERS, TYPOGRAPHY, TOUCH } from '../styles/colors';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS, TYPOGRAPHY, TOUCH, BORDERS, SHADOWS } from '../styles/colors';
 
 export default function Notas() {
   const [notas, setNotas] = useState([]);
@@ -77,42 +79,102 @@ export default function Notas() {
     );
   };
 
+  const handleSOS = () => {
+    Alert.alert(
+      'Emergencia SOS',
+      '¿Deseas llamar al número de emergencias 911?',
+      [
+        { text: 'Cancelar', style: 'cancel' },
+        { 
+          text: 'Llamar', 
+          onPress: () => Linking.openURL('tel:911'),
+          style: 'destructive'
+        }
+      ]
+    );
+  };
+
+  const handleProfile = () => {
+    Alert.alert('Perfil', 'Próximamente');
+  };
+
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <View style={styles.inputContainer}>
-        <TextInput
-          style={styles.input}
-          placeholder="Escribe tu nota aquí..."
-          placeholderTextColor={COLORS.outlineVariant}
-          value={textoNota}
-          onChangeText={setTextoNota}
-          multiline
-        />
-        <BotonGrande
-          titulo="Guardar Nota"
-          onPress={agregarNota}
-          color={COLORS.primary}
-        />
+    <View style={styles.container}>
+      {/* Header con botón SOS y perfil */}
+      <View style={styles.header}>
+        <TouchableOpacity style={styles.sosButton} onPress={handleSOS}>
+          <MaterialCommunityIcons name="shield-check" size={18} color="#FFFFFF" />
+          <Text style={styles.sosText}>SOS</Text>
+        </TouchableOpacity>
+        
+        <View style={styles.logoContainer}>
+          <Text style={styles.logo}>
+            Impac<Text style={styles.logoHighlight}>Tech</Text>
+          </Text>
+        </View>
+        
+        <TouchableOpacity style={styles.profileButton} onPress={handleProfile}>
+          <Ionicons name="person-outline" size={22} color={COLORS.primary} />
+        </TouchableOpacity>
       </View>
 
-      <Text style={styles.tituloLista}>Mis Notas</Text>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.flexContainer}
+      >
+        <ScrollView showsVerticalScrollIndicator={false}>
+          {/* Header de la pantalla */}
+          <View style={styles.pageHeader}>
+            <Text style={styles.pageTitle}>Notas</Text>
+            <Text style={styles.pageSubtitle}>Recordatorios y apuntes importantes.</Text>
+          </View>
 
-      <FlatList
-        data={notas}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <TarjetaNota nota={item} onEliminar={eliminarNota} />
-        )}
-        ListEmptyComponent={
-          <Text style={styles.listaVacia}>
-            No hay notas. ¡Agrega tu primera nota!
-          </Text>
-        }
-      />
-    </KeyboardAvoidingView>
+          {/* Input para nueva nota */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.input}
+              placeholder="Escribe tu nota aquí..."
+              placeholderTextColor={COLORS.outlineVariant}
+              value={textoNota}
+              onChangeText={setTextoNota}
+              multiline
+            />
+            <TouchableOpacity style={styles.addButton} onPress={agregarNota}>
+              <Ionicons name="add-circle-outline" size={24} color={COLORS.onPrimary} />
+              <Text style={styles.addButtonText}>Guardar Nota</Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* Lista de notas */}
+          <View style={styles.cardList}>
+            {notas.length === 0 ? (
+              <View style={styles.emptyContainer}>
+                <Text style={styles.emptyText}>No hay notas</Text>
+                <Text style={styles.emptySubtext}>Presiona "+ Guardar Nota" para crear una</Text>
+              </View>
+            ) : (
+              notas.map((nota) => (
+                <View key={nota.id} style={styles.cardListItem}>
+                  <View style={styles.cardListIcon}>
+                    <Ionicons name="create-outline" size={24} color={COLORS.primary} />
+                  </View>
+                  <View style={styles.cardListBody}>
+                    <Text style={styles.cardListTitle}>{nota.texto}</Text>
+                    <Text style={styles.cardListDesc}>📅 {nota.fecha}</Text>
+                  </View>
+                  <TouchableOpacity 
+                    onPress={() => eliminarNota(nota.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Ionicons name="trash-outline" size={22} color={COLORS.error} />
+                  </TouchableOpacity>
+                </View>
+              ))
+            )}
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+    </View>
   );
 }
 
@@ -121,35 +183,161 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: COLORS.surface,
   },
-  inputContainer: {
+  flexContainer: {
+    flex: 1,
+  },
+  // Header
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 12,
     backgroundColor: COLORS.surfaceContainerLowest,
-    padding: 16,
-    borderBottomWidth: 0, // No usar bordes sólidos
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.outlineVariant + '20',
+  },
+  sosButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.error,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: BORDERS.full,
+    gap: 6,
+    minHeight: 40,
+  },
+  sosText: {
+    color: COLORS.onPrimary,
+    fontSize: 14,
+    fontWeight: '700',
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  logoContainer: {
+    alignItems: 'center',
+  },
+  logo: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontFamily: TYPOGRAPHY.fontFamily,
+    color: COLORS.primary,
+    letterSpacing: -0.5,
+  },
+  logoHighlight: {
+    color: COLORS.primaryContainer,
+  },
+  profileButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.surfaceContainerLow,
+  },
+  // Page Header
+  pageHeader: {
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 16,
+  },
+  pageTitle: {
+    fontSize: TYPOGRAPHY.sizes.display,
+    fontWeight: '600',
+    color: COLORS.primary,
+    fontFamily: TYPOGRAPHY.fontFamily,
+    marginBottom: 4,
+  },
+  pageSubtitle: {
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.onSurface,
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  // Input Container
+  inputContainer: {
+    paddingHorizontal: 20,
+    marginBottom: 20,
   },
   input: {
     backgroundColor: COLORS.surfaceContainerLow,
-    borderRadius: BORDERS.full, // Pill-shaped
+    borderRadius: BORDERS.full,
     padding: 16,
-    fontSize: TYPOGRAPHY.sizes.body,
-    fontFamily: TYPOGRAPHY.fontFamily,
+    fontSize: 16,
     minHeight: 80,
     textAlignVertical: 'top',
-    marginBottom: 12,
+    fontFamily: TYPOGRAPHY.fontFamily,
     color: COLORS.onSurface,
+    marginBottom: 12,
   },
-  tituloLista: {
+  addButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.primary,
+    paddingVertical: 14,
+    borderRadius: BORDERS.full,
+    gap: 8,
+  },
+  addButtonText: {
+    color: COLORS.onPrimary,
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  // Card List
+  cardList: {
+    paddingHorizontal: 20,
+    paddingBottom: 30,
+    gap: 12,
+  },
+  cardListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: COLORS.surfaceContainerLowest,
+    borderRadius: BORDERS.xl,
+    padding: 16,
+    gap: 14,
+    ...SHADOWS,
+  },
+  cardListIcon: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: COLORS.surfaceContainerLow,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cardListBody: {
+    flex: 1,
+  },
+  cardListTitle: {
     fontSize: TYPOGRAPHY.sizes.headline,
     fontWeight: '600',
     color: COLORS.onSurface,
     fontFamily: TYPOGRAPHY.fontFamily,
-    margin: 16,
+    marginBottom: 4,
+  },
+  cardListDesc: {
+    fontSize: 13,
+    color: COLORS.outlineVariant,
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  deleteButton: {
+    padding: 8,
+  },
+  emptyContainer: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyText: {
+    fontSize: TYPOGRAPHY.sizes.headline,
+    color: COLORS.outlineVariant,
+    fontFamily: TYPOGRAPHY.fontFamily,
     marginBottom: 8,
   },
-  listaVacia: {
-    textAlign: 'center',
+  emptySubtext: {
     fontSize: TYPOGRAPHY.sizes.body,
     color: COLORS.outlineVariant,
     fontFamily: TYPOGRAPHY.fontFamily,
-    marginTop: 50,
   },
 });
