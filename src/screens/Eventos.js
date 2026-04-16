@@ -9,11 +9,17 @@ import {
   Modal,
   TextInput,
   Platform,
+  Linking,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { COLORS, TYPOGRAPHY, TOUCH, BORDERS, SHADOWS } from '../styles/colors';
+import { 
+  registerForPushNotificationsAsync, 
+  scheduleEventNotification, 
+  cancelEventNotification 
+} from '../services/notificationService';
 
 export default function Eventos({ navigation }) {
   const [eventos, setEventos] = useState([]);
@@ -27,6 +33,7 @@ export default function Eventos({ navigation }) {
 
   useEffect(() => {
     cargarEventos();
+    registerForPushNotificationsAsync();
   }, []);
 
   const cargarEventos = async () => {
@@ -49,7 +56,7 @@ export default function Eventos({ navigation }) {
     }
   };
 
-  const agregarEvento = () => {
+  const agregarEvento = async () => {
     if (!titulo.trim()) {
       Alert.alert('Atención', 'Escribe un título para el evento');
       return;
@@ -68,7 +75,14 @@ export default function Eventos({ navigation }) {
       fecha: fechaFormateada,
       hora: horaFormateada,
       fechaCompleta: fecha.getTime(),
+      notificationId: null,
     };
+
+    // Programar notificación
+    const notificationId = await scheduleEventNotification(nuevoEvento);
+    if (notificationId) {
+      nuevoEvento.notificationId = notificationId;
+    }
 
     const nuevosEventos = [nuevoEvento, ...eventos].sort((a, b) => b.fechaCompleta - a.fechaCompleta);
     guardarEventos(nuevosEventos);
@@ -78,9 +92,15 @@ export default function Eventos({ navigation }) {
     setFecha(new Date());
     setHora(new Date());
     setModalVisible(false);
+    
+    if (notificationId) {
+      Alert.alert('Éxito', 'Evento guardado. Recibirás una notificación 1 hora antes.');
+    }
   };
 
-  const eliminarEvento = (id) => {
+  const eliminarEvento = async (id) => {
+    const evento = eventos.find(e => e.id === id);
+    
     Alert.alert(
       'Eliminar evento',
       '¿Estás segura de que quieres eliminar este evento?',
@@ -88,7 +108,11 @@ export default function Eventos({ navigation }) {
         { text: 'Cancelar', style: 'cancel' },
         {
           text: 'Eliminar',
-          onPress: () => {
+          onPress: async () => {
+            // Cancelar notificación si existe
+            if (evento.notificationId) {
+              await cancelEventNotification(evento.notificationId);
+            }
             const nuevosEventos = eventos.filter(evento => evento.id !== id);
             guardarEventos(nuevosEventos);
           },
@@ -174,6 +198,9 @@ export default function Eventos({ navigation }) {
                   {evento.descripcion ? (
                     <Text style={styles.cardListDesc}>{evento.descripcion}</Text>
                   ) : null}
+                  {evento.notificationId && (
+                    <Text style={styles.notificationBadge}>🔔 Recordatorio activo</Text>
+                  )}
                 </View>
                 <TouchableOpacity 
                   onPress={() => eliminarEvento(evento.id)}
@@ -201,7 +228,7 @@ export default function Eventos({ navigation }) {
             <Text style={styles.label}>Título *</Text>
             <TextInput
               style={styles.input}
-              placeholder="Ej: Cita médica"
+              placeholder="Ej: Tomar pastillas"
               placeholderTextColor={COLORS.outlineVariant}
               value={titulo}
               onChangeText={setTitulo}
@@ -210,7 +237,7 @@ export default function Eventos({ navigation }) {
             <Text style={styles.label}>Descripción (opcional)</Text>
             <TextInput
               style={[styles.input, styles.textArea]}
-              placeholder="Ej: Llevar análisis"
+              placeholder="Ej: 2 pastillas rojas después de comer"
               placeholderTextColor={COLORS.outlineVariant}
               value={descripcion}
               onChangeText={setDescripcion}
@@ -236,6 +263,10 @@ export default function Eventos({ navigation }) {
                 ⏰ {hora.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' })}
               </Text>
             </TouchableOpacity>
+
+            <Text style={styles.notaInfo}>
+              💡 Recibirás una notificación 1 hora antes del evento
+            </Text>
 
             {mostrarDatePicker && (
               <DateTimePicker
@@ -411,6 +442,13 @@ const styles = StyleSheet.create({
     color: COLORS.outlineVariant,
     fontFamily: TYPOGRAPHY.fontFamily,
   },
+  notificationBadge: {
+    fontSize: 11,
+    color: COLORS.secondary,
+    fontWeight: '500',
+    fontFamily: TYPOGRAPHY.fontFamily,
+    marginTop: 4,
+  },
   deleteButton: {
     padding: 8,
   },
@@ -478,6 +516,13 @@ const styles = StyleSheet.create({
   dateButtonText: {
     fontSize: 16,
     color: COLORS.onSurface,
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  notaInfo: {
+    fontSize: 12,
+    color: COLORS.secondary,
+    marginTop: 12,
+    textAlign: 'center',
     fontFamily: TYPOGRAPHY.fontFamily,
   },
   modalBotones: {
