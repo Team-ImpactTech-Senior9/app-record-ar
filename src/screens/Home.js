@@ -62,7 +62,7 @@ export default function Home({ navigation }) {
       descripcion: 'Ejercita la mente',
       icon: 'game-controller-outline',
       iconLib: 'Ionicons',
-      screen: 'Tutoriales',
+      screen: 'Juegos',
     },
   ];
 

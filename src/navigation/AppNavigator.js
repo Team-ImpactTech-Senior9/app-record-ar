@@ -8,6 +8,7 @@ import Home from '../screens/Home';
 import Notas from '../screens/Notas';
 import Eventos from '../screens/Eventos';
 import Tutoriales from '../screens/Tutoriales';
+import Juegos from '../screens/Juegos';
 import Ayuda from '../screens/Ayuda';
 
 const Stack = createStackNavigator();
@@ -18,7 +19,7 @@ export default function AppNavigator() {
       <Stack.Navigator
         initialRouteName="Onboarding"
         screenOptions={{
-          headerShown: false,  // Esto oculta el header en TODAS las pantallas
+          headerShown: false,
         }}
       >
         <Stack.Screen name="Onboarding" component={Onboarding} />
@@ -27,6 +28,7 @@ export default function AppNavigator() {
         <Stack.Screen name="Notas" component={Notas} />
         <Stack.Screen name="Eventos" component={Eventos} />
         <Stack.Screen name="Tutoriales" component={Tutoriales} />
+        <Stack.Screen name="Juegos" component={Juegos} />
         <Stack.Screen name="Ayuda" component={Ayuda} />
       </Stack.Navigator>
     </NavigationContainer>
