@@ -11,6 +11,7 @@ import {
   Platform,
   Linking,
   ScrollView,
+  Modal,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -19,6 +20,8 @@ import { COLORS, TYPOGRAPHY, TOUCH, BORDERS, SHADOWS } from '../styles/colors';
 export default function Notas() {
   const [notas, setNotas] = useState([]);
   const [textoNota, setTextoNota] = useState('');
+  const [modalVisible, setModalVisible] = useState(false);
+  const [notaSeleccionada, setNotaSeleccionada] = useState(null);
 
   useEffect(() => {
     cargarNotas();
@@ -98,6 +101,45 @@ export default function Notas() {
     Alert.alert('Perfil', 'Próximamente');
   };
 
+  // Función para truncar texto
+  const truncarTexto = (texto, maxLength = 80) => {
+    if (texto.length <= maxLength) return texto;
+    return texto.substring(0, maxLength) + '...';
+  };
+
+  const verNotaCompleta = (nota) => {
+    setNotaSeleccionada(nota);
+    setModalVisible(true);
+  };
+
+  const renderNota = ({ item }) => {
+    const textoTruncado = truncarTexto(item.texto, 80);
+    const esLarga = item.texto.length > 80;
+
+    return (
+      <View style={styles.cardListItem}>
+        <View style={styles.cardListIcon}>
+          <Ionicons name="create-outline" size={24} color={COLORS.primary} />
+        </View>
+        <View style={styles.cardListBody}>
+          <Text style={styles.cardListTitle}>{textoTruncado}</Text>
+          <Text style={styles.cardListDesc}>📅 {item.fecha}</Text>
+          {esLarga && (
+            <TouchableOpacity onPress={() => verNotaCompleta(item)}>
+              <Text style={styles.verMasTexto}>Ver más...</Text>
+            </TouchableOpacity>
+          )}
+        </View>
+        <TouchableOpacity 
+          onPress={() => eliminarNota(item.id)}
+          style={styles.deleteButton}
+        >
+          <Ionicons name="trash-outline" size={22} color={COLORS.error} />
+        </TouchableOpacity>
+      </View>
+    );
+  };
+
   return (
     <View style={styles.container}>
       {/* Header con botón SOS y perfil */}
@@ -159,8 +201,13 @@ export default function Notas() {
                     <Ionicons name="create-outline" size={24} color={COLORS.primary} />
                   </View>
                   <View style={styles.cardListBody}>
-                    <Text style={styles.cardListTitle}>{nota.texto}</Text>
+                    <Text style={styles.cardListTitle}>{truncarTexto(nota.texto, 80)}</Text>
                     <Text style={styles.cardListDesc}>📅 {nota.fecha}</Text>
+                    {nota.texto.length > 80 && (
+                      <TouchableOpacity onPress={() => verNotaCompleta(nota)}>
+                        <Text style={styles.verMasTexto}>Ver más...</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                   <TouchableOpacity 
                     onPress={() => eliminarNota(nota.id)}
@@ -174,6 +221,30 @@ export default function Notas() {
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
+
+      {/* Modal para ver nota completa */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalContainer}>
+          <View style={styles.modalContent}>
+            <Text style={styles.modalTitulo}>Nota completa</Text>
+            <ScrollView style={styles.modalScroll}>
+              <Text style={styles.modalTexto}>{notaSeleccionada?.texto}</Text>
+              <Text style={styles.modalFecha}>📅 {notaSeleccionada?.fecha}</Text>
+            </ScrollView>
+            <TouchableOpacity 
+              style={styles.modalCloseButton} 
+              onPress={() => setModalVisible(false)}
+            >
+              <Text style={styles.modalCloseText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -322,6 +393,13 @@ const styles = StyleSheet.create({
     color: COLORS.outlineVariant,
     fontFamily: TYPOGRAPHY.fontFamily,
   },
+  verMasTexto: {
+    fontSize: 13,
+    color: COLORS.primary,
+    fontWeight: '500',
+    fontFamily: TYPOGRAPHY.fontFamily,
+    marginTop: 4,
+  },
   deleteButton: {
     padding: 8,
   },
@@ -338,6 +416,55 @@ const styles = StyleSheet.create({
   emptySubtext: {
     fontSize: TYPOGRAPHY.sizes.body,
     color: COLORS.outlineVariant,
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  // Modal
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  modalContent: {
+    backgroundColor: COLORS.surfaceContainerLowest,
+    marginHorizontal: 20,
+    borderRadius: BORDERS.xl,
+    padding: 20,
+    maxHeight: '80%',
+  },
+  modalTitulo: {
+    fontSize: TYPOGRAPHY.sizes.headline,
+    fontWeight: '600',
+    color: COLORS.primary,
+    textAlign: 'center',
+    marginBottom: 16,
+    fontFamily: TYPOGRAPHY.fontFamily,
+  },
+  modalScroll: {
+    maxHeight: 400,
+  },
+  modalTexto: {
+    fontSize: TYPOGRAPHY.sizes.body,
+    color: COLORS.onSurface,
+    fontFamily: TYPOGRAPHY.fontFamily,
+    lineHeight: 24,
+    marginBottom: 16,
+  },
+  modalFecha: {
+    fontSize: 13,
+    color: COLORS.outlineVariant,
+    fontFamily: TYPOGRAPHY.fontFamily,
+    marginBottom: 16,
+  },
+  modalCloseButton: {
+    backgroundColor: COLORS.primary,
+    paddingVertical: 12,
+    borderRadius: BORDERS.full,
+    alignItems: 'center',
+  },
+  modalCloseText: {
+    color: COLORS.onPrimary,
+    fontSize: 16,
+    fontWeight: '600',
     fontFamily: TYPOGRAPHY.fontFamily,
   },
 });
